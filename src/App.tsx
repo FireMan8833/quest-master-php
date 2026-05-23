@@ -28,7 +28,7 @@ export default function App() {
   const [secretInput, setSecretInput] = useState('');
 
   // Очки
-  const [score, setScore] = useState(0);
+  const [score, setScore] = useState(500);
 
   // Кастомные режимы (доступны после 10 и 20 уровней)
   const [chaosMode, setChaosMode] = useState(false);
@@ -464,10 +464,22 @@ export default function App() {
                 </p>
                 {isCorrect === null && !showHint && (
                   <button 
-                    onClick={() => setShowHint(true)}
-                    className={`shrink-0 px-3 py-1.5 bg-indigo-500/20 hover:bg-indigo-500/40 border border-indigo-500/50 text-indigo-300 rounded-lg text-xs font-bold uppercase tracking-wider flex items-center gap-1 transition-all ${chaosMode ? 'hover-wiggle' : 'hover:scale-110 hover:-rotate-3'}`}
+                    onClick={() => {
+                      if (score >= 500) {
+                        setScore(s => s - 500);
+                        setShowHint(true);
+                        audioSystem.playCorrectSound();
+                      }
+                    }}
+                    disabled={score < 500}
+                    className={`shrink-0 px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider flex items-center gap-1 transition-all ${
+                      score < 500 
+                        ? 'bg-slate-800/80 border border-slate-700/60 text-slate-500 cursor-not-allowed opacity-50' 
+                        : `bg-indigo-500/20 hover:bg-indigo-500/40 border border-indigo-500/50 text-indigo-300 ${chaosMode ? 'hover-wiggle' : 'hover:scale-110 hover:-rotate-3'}`
+                    }`}
+                    title={score < 500 ? 'Недостаточно очков для подсказки (требуется 500 очков)' : 'Использовать подсказку (-500 очков)'}
                   >
-                    💡 Подсказка
+                    💡 Подсказка {score < 500 ? '(Нужно 500 ★)' : '(-500 ★)'}
                   </button>
                 )}
               </div>
