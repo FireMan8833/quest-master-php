@@ -4,6 +4,7 @@ import { questData } from './data';
 import { Mascot } from './components/Mascot';
 import { Terminal, Database, Code, ShieldCheck, CheckCircle, ArrowRight, Play, Volume2, VolumeX } from 'lucide-react';
 import { BugCatcherGame, QueryBuilderGame } from './components/MiniGames';
+import { SqlBossGame, RAMBossGame, DdosBossGame, FinalBossGame } from './components/BossMiniGames';
 import { achievementsData, Achievement } from './achievements';
 import { audioSystem } from './audio';
 
@@ -537,6 +538,42 @@ export default function App() {
                   checkAchievement(step.id);
                }} />
             )}
+            {step.type === 'mini_game' && step.miniGameType === 'boss_sql' && isCorrect === null && (
+               <SqlBossGame onWin={() => {
+                  audioSystem.playCorrectSound();
+                  confetti({particleCount: 150, spread: 80});
+                  if (isCorrect !== true) setScore(s => s + 300 * (superChaos ? 2 : 1));
+                  setIsCorrect(true);
+                  checkAchievement(step.id);
+               }} />
+            )}
+            {step.type === 'mini_game' && step.miniGameType === 'boss_ram' && isCorrect === null && (
+               <RAMBossGame onWin={() => {
+                  audioSystem.playCorrectSound();
+                  confetti({particleCount: 150, spread: 80});
+                  if (isCorrect !== true) setScore(s => s + 400 * (superChaos ? 2 : 1));
+                  setIsCorrect(true);
+                  checkAchievement(step.id);
+               }} />
+            )}
+            {step.type === 'mini_game' && step.miniGameType === 'boss_ddos' && isCorrect === null && (
+               <DdosBossGame onWin={() => {
+                  audioSystem.playCorrectSound();
+                  confetti({particleCount: 150, spread: 80});
+                  if (isCorrect !== true) setScore(s => s + 500 * (superChaos ? 2 : 1));
+                  setIsCorrect(true);
+                  checkAchievement(step.id);
+               }} />
+            )}
+            {step.type === 'mini_game' && step.miniGameType === 'boss_final' && isCorrect === null && (
+               <FinalBossGame onWin={() => {
+                  audioSystem.playCorrectSound();
+                  confetti({particleCount: 300, spread: 120});
+                  if (isCorrect !== true) setScore(s => s + 1000 * (superChaos ? 2 : 1));
+                  setIsCorrect(true);
+                  checkAchievement(step.id);
+               }} />
+            )}
             
             {/* Explanation Area */}
             {isCorrect !== null && (
@@ -590,10 +627,10 @@ export default function App() {
 
                 {/* Milestones nodes */}
                 {[
-                  { step: 10, label: 'Настройка CRUD', icon: '⚙️' },
-                  { step: 20, label: 'Безопасность', icon: '🛡️' },
-                  { step: 30, label: 'Связи & JOIN', icon: '🔗' },
-                  { step: 40, label: 'Запуск в Сеть', icon: '🚀' },
+                  { step: 11, label: 'Босс 1: SQL', icon: '🪱' },
+                  { step: 21, label: 'Безопасность', icon: '🛡️' },
+                  { step: 33, label: 'Босс 3: DDoS', icon: '⚡' },
+                  { step: 44, label: 'Финал: ИИ', icon: '🚀' },
                 ].map((m, i) => {
                   const pos = (m.step / questData.length) * 100;
                   const isReached = (currentStepIndex + 1) >= m.step;

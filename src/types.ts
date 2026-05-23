@@ -8,6 +8,6 @@ export interface QuestStep {
   options?: string[];
   correctAnswer?: string | number | boolean;
   explanation: string;
-  miniGameType?: 'bug_catcher' | 'query_builder';
+  miniGameType?: 'bug_catcher' | 'query_builder' | 'boss_sql' | 'boss_ram' | 'boss_ddos' | 'boss_final';
   gameData?: any;
 }

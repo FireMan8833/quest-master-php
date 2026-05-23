@@ -1,6 +1,6 @@
 {
-  "name": "",
-  "description": "",
+  "name": "Квест Мастер PHP и SQL",
+  "description": "Увлекательная аркадная игра-викторина для изучения веб-разработки на PHP и баз данных SQL с супербоссами",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }
