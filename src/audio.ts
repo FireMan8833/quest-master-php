@@ -2,6 +2,7 @@ class SynthAudio {
   ctx: AudioContext | null = null;
   bgOsc: OscillatorNode | null = null;
   bgGain: GainNode | null = null;
+  isMuted: boolean = false;
 
   init() {
     if (!this.ctx) {
@@ -12,7 +13,18 @@ class SynthAudio {
     }
   }
 
+  toggleMute() {
+    this.isMuted = !this.isMuted;
+    if (this.isMuted) {
+      this.toggleBackgroundMusic(false);
+    } else {
+      this.toggleBackgroundMusic(true);
+    }
+    return this.isMuted;
+  }
+
   playCorrectSound() {
+    if (this.isMuted) return;
     this.init();
     if (!this.ctx) return;
     
@@ -38,6 +50,7 @@ class SynthAudio {
   }
 
   playWrongSound() {
+    if (this.isMuted) return;
     this.init();
     if (!this.ctx) return;
     
@@ -61,6 +74,7 @@ class SynthAudio {
   }
 
   playAchievementSound() {
+    if (this.isMuted) return;
     this.init();
     if (!this.ctx) return;
     
@@ -88,6 +102,7 @@ class SynthAudio {
   }
 
   toggleBackgroundMusic(play: boolean) {
+    if (this.isMuted) play = false;
     this.init();
     if (!this.ctx) return;
 
@@ -120,7 +135,9 @@ class SynthAudio {
       this.bgGain.gain.linearRampToValueAtTime(0.01, t + 0.5);
       setTimeout(() => {
         if (this.bgOsc) {
-          this.bgOsc.stop();
+          try {
+            this.bgOsc.stop();
+          } catch(e){}
           this.bgOsc.disconnect();
           this.bgOsc = null;
         }

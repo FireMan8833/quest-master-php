@@ -1,1 +1,26 @@
 @import "tailwindcss";
+
+@keyframes wiggle {
+  0%, 100% { transform: rotate(-2deg) scale(1.05); }
+  50% { transform: rotate(2deg) scale(1.05); }
+}
+
+@keyframes crazy-wiggle {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  20% { transform: translate(-2px, 2px) rotate(-1deg); }
+  40% { transform: translate(-2px, -2px) rotate(1deg); }
+  60% { transform: translate(2px, 2px) rotate(0deg); }
+  80% { transform: translate(2px, -2px) rotate(1deg); }
+}
+
+.hover-wiggle {
+  transition: transform 0.2s ease-in-out;
+}
+
+.hover-wiggle:hover {
+  animation: wiggle 0.25s infinite ease-in-out;
+}
+
+.crazy-hover:hover {
+  animation: crazy-wiggle 0.15s infinite linear;
+}

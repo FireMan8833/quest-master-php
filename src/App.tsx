@@ -1,8 +1,8 @@
-import { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import confetti from 'canvas-confetti';
 import { questData } from './data';
 import { Mascot } from './components/Mascot';
-import { Terminal, Database, Code, ShieldCheck, CheckCircle, ArrowRight, Play } from 'lucide-react';
+import { Terminal, Database, Code, ShieldCheck, CheckCircle, ArrowRight, Play, Volume2, VolumeX } from 'lucide-react';
 import { BugCatcherGame, QueryBuilderGame } from './components/MiniGames';
 import { achievementsData, Achievement } from './achievements';
 import { audioSystem } from './audio';
@@ -15,6 +15,7 @@ export default function App() {
   const [emotion, setEmotion] = useState<'happy' | 'think' | 'excited' | 'error'>('happy');
   const [completed, setCompleted] = useState(false);
   const [showHint, setShowHint] = useState(false);
+  const [soundMuted, setSoundMuted] = useState(false);
   
   // Достижения
   const [unlockedAchievements, setUnlockedAchievements] = useState<string[]>([]);
@@ -28,16 +29,23 @@ export default function App() {
   // Очки
   const [score, setScore] = useState(0);
 
+  // Кастомные режимы (доступны после 10 и 20 уровней)
+  const [chaosMode, setChaosMode] = useState(false);
+  const [superChaos, setSuperChaos] = useState(false);
+
   const step = questData[currentStepIndex];
   const progress = ((currentStepIndex) / questData.length) * 100;
 
   // Хаос режим: перемешивание вариантов ответов
   const shuffledOptions = useMemo(() => {
     if (step.type !== 'mini_game' && step.options) {
-      return [...step.options].sort(() => Math.random() - 0.5);
+      if (chaosMode) {
+        return [...step.options].sort(() => Math.random() - 0.5);
+      }
+      return step.options;
     }
     return [];
-  }, [step.id]);
+  }, [step.id, chaosMode]);
 
   useEffect(() => {
     if (isCorrect === true) {
@@ -158,11 +166,8 @@ export default function App() {
     setSelectedOption(answer);
     if (answer === step.correctAnswer) {
       audioSystem.playCorrectSound();
-      if (isCorrect === null) {
-        setScore(s => s + 100);
-      } else if (isCorrect === false) {
-        setScore(s => s + 50); // half points if retrying
-      }
+      const points = (isCorrect === null ? 100 : 50) * (superChaos ? 2 : 1);
+      setScore(s => s + points);
       setIsCorrect(true);
       if (currentStepIndex === questData.length - 1) {
         confetti({
@@ -294,6 +299,51 @@ export default function App() {
         </div>
         
         <div className="flex items-center gap-6">
+          {/* Режимы Модификаторов */}
+          <div className="flex items-center gap-2 bg-slate-900/50 border border-slate-700/60 px-2.5 py-1 rounded-xl shadow-inner">
+            {/* Режим Хаос (с 10 уровня) */}
+            <button
+              onClick={() => {
+                if (currentStepIndex + 1 >= 10) {
+                  audioSystem.playCorrectSound();
+                  setChaosMode(!chaosMode);
+                }
+              }}
+              title={currentStepIndex + 1 < 10 ? 'Откроется после 10 уровня!' : 'Перемешать варианты ответов наугад!'}
+              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-black uppercase transition-all duration-300 ${
+                currentStepIndex + 1 < 10
+                  ? 'opacity-40 cursor-not-allowed text-slate-500 bg-slate-800/50'
+                  : chaosMode
+                  ? 'bg-amber-400 text-slate-950 shadow-[0_0_15px_rgba(245,158,11,0.6)] animate-pulse hover:scale-105'
+                  : 'text-amber-400 bg-slate-800/80 hover:bg-slate-700 hover:scale-105'
+              }`}
+            >
+              <span>{currentStepIndex + 1 < 10 ? '🔒' : '🌀'}</span>
+              <span className="hidden sm:inline text-[10px] uppercase font-black tracking-wider leading-none">Хаос</span>
+            </button>
+
+            {/* Режим Супер (с 20 уровня) */}
+            <button
+              onClick={() => {
+                if (currentStepIndex + 1 >= 20) {
+                  audioSystem.playCorrectSound();
+                  setSuperChaos(!superChaos);
+                }
+              }}
+              title={currentStepIndex + 1 < 20 ? 'Откроется после 20 уровня!' : 'Ультра Драйв: Удвоить начисляемые очки!'}
+              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-black uppercase transition-all duration-300 ${
+                currentStepIndex + 1 < 20
+                  ? 'opacity-40 cursor-not-allowed text-slate-500 bg-slate-800/50'
+                  : superChaos
+                  ? 'bg-purple-500 text-white shadow-[0_0_15px_rgba(139,92,246,0.6)] animate-bounce'
+                  : 'text-purple-400 bg-slate-800/80 hover:bg-slate-700 hover:scale-105'
+              }`}
+            >
+              <span>{currentStepIndex + 1 < 20 ? '🔒' : '⚡'}</span>
+              <span className="hidden sm:inline text-[10px] uppercase font-black tracking-wider leading-none">Супер</span>
+            </button>
+          </div>
+
           <div className="flex flex-col items-end">
             <span className="text-[10px] uppercase text-slate-400 font-semibold tracking-widest hidden sm:block">Общий Прогресс</span>
             <div className="flex items-center gap-2 mt-1">
@@ -314,6 +364,21 @@ export default function App() {
               Очков
             </div>
           </div>
+
+          <button 
+            onClick={() => {
+              const muted = audioSystem.toggleMute();
+              setSoundMuted(muted);
+            }}
+            title={soundMuted ? 'Включить звук' : 'Выключить звук'}
+            className={`border px-3 py-2 rounded-lg flex items-center justify-center transition-all duration-300 hover:scale-105 active:scale-95 ${
+              soundMuted 
+                ? 'bg-red-500/10 border-red-500/30 text-red-400 hover:bg-red-500/20' 
+                : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20'
+            }`}
+          >
+            {soundMuted ? <VolumeX className="w-4.5 h-4.5" /> : <Volume2 className="w-4.5 h-4.5" />}
+          </button>
         </div>
       </header>
 
@@ -399,7 +464,7 @@ export default function App() {
                 {isCorrect === null && !showHint && (
                   <button 
                     onClick={() => setShowHint(true)}
-                    className="shrink-0 px-3 py-1.5 bg-indigo-500/20 hover:bg-indigo-500/40 border border-indigo-500/50 text-indigo-300 rounded-lg text-xs font-bold uppercase tracking-wider flex items-center gap-1 transition-all hover:scale-110 hover:-rotate-3"
+                    className={`shrink-0 px-3 py-1.5 bg-indigo-500/20 hover:bg-indigo-500/40 border border-indigo-500/50 text-indigo-300 rounded-lg text-xs font-bold uppercase tracking-wider flex items-center gap-1 transition-all ${chaosMode ? 'hover-wiggle' : 'hover:scale-110 hover:-rotate-3'}`}
                   >
                     💡 Подсказка
                   </button>
@@ -443,7 +508,7 @@ export default function App() {
                     key={idx}
                     disabled={isCorrect !== null}
                     onClick={() => verifyAnswer(opt)}
-                    className={`p-4 border-2 rounded-xl text-left flex items-center gap-4 transition-all duration-200 hover:-translate-y-1 hover:shadow-lg ${btnStyle}`}
+                    className={`p-4 border-2 rounded-xl text-left flex items-center gap-4 transition-all duration-200 hover:-translate-y-1 hover:shadow-lg ${btnStyle} ${chaosMode ? 'hover-wiggle' : ''}`}
                   >
                     <div className={`w-8 h-8 shrink-0 rounded flex items-center justify-center font-mono font-bold text-sm transition-colors ${letterBg}`}>
                       {letter}
@@ -458,7 +523,7 @@ export default function App() {
             {step.type === 'mini_game' && step.miniGameType === 'bug_catcher' && isCorrect === null && (
                <BugCatcherGame onWin={() => { 
                   audioSystem.playCorrectSound();
-                  if (isCorrect !== true) setScore(s => s + 150);
+                  if (isCorrect !== true) setScore(s => s + 150 * (superChaos ? 2 : 1));
                   setIsCorrect(true); 
                   checkAchievement(step.id); 
                }} />
@@ -467,7 +532,7 @@ export default function App() {
                <QueryBuilderGame data={step.gameData} onWin={() => {
                   audioSystem.playCorrectSound();
                   confetti({particleCount: 200, spread: 90});
-                  if (isCorrect !== true) setScore(s => s + 200);
+                  if (isCorrect !== true) setScore(s => s + 200 * (superChaos ? 2 : 1));
                   setIsCorrect(true);
                   checkAchievement(step.id);
                }} />
