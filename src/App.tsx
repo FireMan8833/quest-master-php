@@ -5,6 +5,7 @@ import { Mascot } from './components/Mascot';
 import { Terminal, Database, Code, ShieldCheck, CheckCircle, ArrowRight, Play } from 'lucide-react';
 import { BugCatcherGame, QueryBuilderGame } from './components/MiniGames';
 import { achievementsData, Achievement } from './achievements';
+import { audioSystem } from './audio';
 
 export default function App() {
   const [started, setStarted] = useState(false);
@@ -54,6 +55,7 @@ export default function App() {
       setUnlockedAchievements(prev => {
         if (!prev.includes(matched.id)) {
           setTimeout(() => {
+            audioSystem.playAchievementSound();
             setActiveAchievement(matched);
             const themeColors = matched.theme === 'emerald' ? ['#10B981', '#34D399', '#ffffff'] :
                                 matched.theme === 'purple' ? ['#8B5CF6', '#A78BFA', '#ffffff'] :
@@ -149,11 +151,13 @@ export default function App() {
   const handleStart = () => {
     setStarted(true);
     setEmotion('happy');
+    audioSystem.toggleBackgroundMusic(true);
   };
 
   const verifyAnswer = (answer: string) => {
     setSelectedOption(answer);
     if (answer === step.correctAnswer) {
+      audioSystem.playCorrectSound();
       if (isCorrect === null) {
         setScore(s => s + 100);
       } else if (isCorrect === false) {
@@ -169,6 +173,7 @@ export default function App() {
       }
       checkAchievement(step.id);
     } else {
+      audioSystem.playWrongSound();
       setIsCorrect(false);
     }
   };
@@ -452,6 +457,7 @@ export default function App() {
             </div>
             {step.type === 'mini_game' && step.miniGameType === 'bug_catcher' && isCorrect === null && (
                <BugCatcherGame onWin={() => { 
+                  audioSystem.playCorrectSound();
                   if (isCorrect !== true) setScore(s => s + 150);
                   setIsCorrect(true); 
                   checkAchievement(step.id); 
@@ -459,6 +465,7 @@ export default function App() {
             )}
             {step.type === 'mini_game' && step.miniGameType === 'query_builder' && isCorrect === null && (
                <QueryBuilderGame data={step.gameData} onWin={() => {
+                  audioSystem.playCorrectSound();
                   confetti({particleCount: 200, spread: 90});
                   if (isCorrect !== true) setScore(s => s + 200);
                   setIsCorrect(true);

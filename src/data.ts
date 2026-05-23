@@ -404,7 +404,7 @@ export const questData: QuestStep[] = [
   {
     id: 40,
     dialog: "СУПЕРКОДИНГ! Архитектура готова, базы синхронизированы. Чтобы окончательно запустить проект, собери пазл из SQL-кода!",
-    question: "Собери правильный SQL-запрос для выборки активных туров: SELECT * FROM tours WHERE status = 'active' ORDER BY price DESC",
+    question: "Собери правильный SQL-запрос для выборки всех активных туров, отсортированных по убыванию цены.",
     type: "mini_game",
     miniGameType: "query_builder",
     gameData: {
